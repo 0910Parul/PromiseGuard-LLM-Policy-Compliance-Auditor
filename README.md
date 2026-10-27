@@ -1,65 +1,109 @@
-# PromiseGuard: Auditing Sales & Support Promises Against Company Policy with a Local LLM
+# PromiseGuard: LLM-Powered Policy Compliance Auditing
 
-This project builds an **NLP compliance auditor** that reads sales and customer-support transcripts, extracts every commitment a rep made ("I can waive that fee for you"), and checks it against the company's actual policy document — returning a **compliant / violation / ambiguous** verdict with the **cited policy clause** and a plain-language rationale. It runs **100% locally on Llama 3.1 8B via Ollama** (no cloud, no paid APIs), and correctly classified **all 10 test transcripts** in the final regression run. Built for **MSBA 6461 — Large Language Models** (Carlson, University of Minnesota).
+## Project Overview
 
-## 🔍 Project Goals
+PromiseGuard is a local prototype for reviewing commitments in sales and customer-support transcripts against a company's policy handbook. It extracts representative promises, compares them with policy, and returns a **compliant**, **violation**, or **ambiguous** verdict with a clause reference and rationale for human review.
 
-- Catch unauthorized promises (unapproved fee waivers, out-of-window refunds, price locks, unreleased-feature dates) **before** they turn into refunds, escalations, or margin leakage.
-- Ground every flag in **specific policy language**, so a manager can verify the call instead of trusting a black box.
-- Keep sensitive customer transcripts on-premise with a **local-only LLM architecture**, and frame the tool as a viable B2B product.
+The business objective is to help Revenue and Support Operations teams identify promises that may lead to concessions, escalations, or unmet expectations. The application uses **Llama 3.1 8B through Ollama**, with a Streamlit interface and a Python pipeline.
 
-## 📄 Files Included
+## Key Highlights
 
-- **`backend/`** — the NLP pipeline:
-  - `promise_extraction.py` — LLM extracts candidate promises as structured JSON (`statement`, `speaker`, `context`).
-  - `policy_matcher.py` — retrieves the relevant policy section for each promise.
-  - `compliance_checker.py` — LLM compares promise vs. policy → verdict, matched clause, rationale.
-  - `pipeline.py` — end-to-end orchestration with Pydantic-validated outputs.
-  - `ollama_client.py` — local model wrapper with retries; `evaluate.py` — batch evaluation script.
-- **`frontend/app.py`** — Streamlit app: upload a policy + transcript, run the audit, review color-coded flags.
-- **`tests/test_pipeline.py`** — pytest regression suite run against the **live model** (no mocks) to catch prompt/schema regressions.
-- **`data/`** — a SaaS company policy handbook and **10 synthetic transcripts** (3 clean, 4 violation, 3 ambiguous) across calls and chats.
-- **`docs/PromiseGuard_Business_Plan_Final.docx`** — productization plan: value proposition, pricing, market sizing, competitors, go-to-market.
-- **`docs/PROJECT_PLAN.md`** — architecture and design rationale.
-- **`requirements.txt`** — Python dependencies.
+- **Reviewable outputs:** each extracted promise includes its speaker, context, verdict, policy-clause field, and rationale.
+- **Local inference by default:** the configured model runs through a local Ollama server without a paid cloud LLM API.
+- **Evaluation coverage:** **10 synthetic transcripts** spanning 3 clean, 4 violation, and 3 ambiguous cases.
+- **Usable prototype:** choose demo files or upload a policy and transcript, filter verdicts, and download the resulting JSON report.
+- **Business analysis:** a separate product plan develops buyer needs, proposed pricing, market-sizing scenarios, and pilot objectives.
 
-## 🧪 Methods Used
+Start with the [pipeline](backend/pipeline.py), [regression suite](tests/test_pipeline.py), or [results evidence](docs/RESULTS_EVIDENCE.md).
 
-- **LLM information extraction** of commitments from unstructured conversational text, with structured JSON outputs.
-- **Policy retrieval + LLM-based semantic comparison** against conditional, natural-language rules (e.g., "one fee waiver per 12 months, accounts in good standing only").
-- **Prompt and output-schema engineering** — field ordering, filler-phrase exclusion, and grounding constraints to reduce circular or hallucinated rationales.
-- **Evaluation design:** a labeled synthetic test suite covering clean, violation, and ambiguous cases, with category-level pytest assertions re-run after every prompt change.
-- Product strategy: tiered per-agent pricing, TAM/SAM/SOM sizing, and competitive positioning vs. Gong, Observe.AI, and Enthu.ai.
+## Technical Implementation
 
-## 📈 Key Findings
+| Stage | Current implementation |
+|---|---|
+| Promise extraction | LLM extracts representative commitments, speaker, and surrounding context into Pydantic-validated JSON; prompts exclude noncommittal filler and merge repeated commitments |
+| Policy context | `policy_matcher.py` passes the **full policy document** to the comparison step; selective or embedding-based retrieval is a possible extension |
+| Compliance comparison | LLM compares each promise with policy and transcript facts, returning a rationale, clause reference, and one of three verdicts |
+| Validation and orchestration | Pydantic schemas validate output structure; the pipeline combines extraction and comparison results into a report |
+| Review interface | Streamlit supports one transcript per analysis, verdict filters, source preview, and JSON export |
+| Batch inspection and testing | `backend.evaluate` loops over transcript files; pytest checks category-level behavior against the live local model |
 
-- The final pipeline classified **all 10 synthetic transcripts correctly** at the category level — no violations flagged on clean calls, at least one violation caught in every violation transcript, and borderline language routed to *ambiguous* rather than over-flagged.
-- **Output schema order affects quality:** asking for the *rationale before the verdict* produced more coherent, policy-grounded classifications — especially on ambiguous cases.
-- Validation caught **circular reasoning** on compliant verdicts (the rationale simply restated the rep's words); the prompt was revised to require a policy citation or an explicit "no clause applies."
-- **Fixes can create new failures:** an over-strict citation requirement caused the model to fabricate a policy clause and flip a true violation to compliant — reinforcing the practice of re-validating the full test set after every prompt change.
-- Business case (illustrative planning scenario): per-agent pricing at **$12/agent/month**, an estimated **~87% gross margin** enabled by local inference, and a **$90M** serviceable market among U.S. mid-market B2B SaaS companies.
+The compliance schema places the rationale before the verdict. Development documentation describes improved output coherence with that ordering; a controlled study of the effect has not been performed.
 
-## 🛠 Technologies
+## Methods & Technologies
 
-- Python, Pydantic
-- Ollama + **Llama 3.1 8B** (local LLM inference)
-- Streamlit (front end)
-- pytest (live-model regression testing)
-- Prompt engineering & structured LLM outputs
+- **Python:** pipeline orchestration and structured data handling with Pydantic.
+- **LLM application:** Ollama, Llama 3.1 8B, prompt design, JSON schemas, and conditional policy comparison.
+- **Interface:** Streamlit, including local text-file upload and downloadable reports.
+- **Evaluation:** pytest integration checks using a live Ollama model, plus synthetic policy/transcript fixtures.
 
-## 🚀 How to Run
+## Results & Insights
+
+| Evidence | What it establishes |
+|---|---|
+| 3 clean transcripts | Tests assert that no `violation` verdict is returned |
+| 4 violation transcripts | Tests require at least one `violation` per transcript |
+| 3 ambiguous transcripts | Tests require at least one `ambiguous` verdict and no `violation` |
+| Pydantic output models | Structural validation of extracted promises and report fields |
+| Business plan | Documented development observations, product concept, and commercial assumptions |
+
+The original README reports a final run that satisfied the checks for all 10 transcripts. The repository does not include a saved test-run log, and the live model was not rerun for this documentation update. This remains a **reported development result**, rather than an independently verified accuracy benchmark. Category-level assertions also do not measure the correctness or completeness of every extracted promise and citation.
+
+Development observations include circular compliant rationales and a prompt change that introduced an incorrect policy citation. These findings motivate full-suite regression checks and human verification of generated claims. Schema validation checks structure; it does not establish factual correctness.
+
+### Business planning scope
+
+The [business plan](docs/PromiseGuard_Business_Plan_Final.docx) proposes pricing tiers and illustrates a Growth-tier scenario of **100 agents × $12/month = $1,200 monthly revenue**, with an assumed $150 serving cost giving approximately **87.5% gross margin**. Its **$90M serviceable-market scenario** assumes 30,000 firms at $3,000 annual contract value. These are planning assumptions, not observed revenue, validated costs, or independently sourced market estimates.
+
+## Repository Structure
+
+| Path | Purpose |
+|---|---|
+| [backend/promise_extraction.py](backend/promise_extraction.py) | Candidate commitment extraction |
+| [backend/policy_matcher.py](backend/policy_matcher.py) | Full-policy context adapter |
+| [backend/compliance_checker.py](backend/compliance_checker.py) | Policy comparison prompts and verdict schema |
+| [backend/pipeline.py](backend/pipeline.py) | Report models and end-to-end orchestration |
+| [backend/ollama_client.py](backend/ollama_client.py) | Model settings, timeout, and retry wrapper |
+| [backend/evaluate.py](backend/evaluate.py) | Batch transcript inspection |
+| [frontend/app.py](frontend/app.py) | Streamlit review interface |
+| [tests/test_pipeline.py](tests/test_pipeline.py) | Live-model category-level regression checks |
+| [data/policies](data/policies/) and [data/transcripts](data/transcripts/) | Demo handbook and 10 synthetic transcripts |
+| [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) | Design rationale and roadmap context |
+| [docs/PromiseGuard_Business_Plan_Final.docx](docs/PromiseGuard_Business_Plan_Final.docx) | Productization plan and assumptions |
+| [docs/RESULTS_EVIDENCE.md](docs/RESULTS_EVIDENCE.md) | Evidence sources and evaluation limits |
+| [requirements.txt](requirements.txt) | Pinned Python dependencies |
+
+## Getting Started
+
+Install [Ollama](https://ollama.com/download) and ensure its local server is running. From the repository root:
 
 ```bash
-ollama pull llama3.1:8b             # install Ollama first: https://ollama.com/download
-pip install -r requirements.txt
-streamlit run frontend/app.py       # opens at http://localhost:8501
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+ollama pull llama3.1:8b
+streamlit run frontend/app.py
 ```
 
-Upload `data/policies/company_policy.md` and any transcript from `data/transcripts/`, then run the analysis. Run the tests with `pytest` (requires the Ollama server running).
+In the app, select the demo policy and a transcript, or upload a policy (`.md`/`.txt`) and transcript (`.txt`). Run the analysis, inspect the cited clauses, and download a JSON report if needed. PDF upload is not implemented.
 
-## ✅ Outcome
+For batch inspection and the live-model regression checks:
 
-A working, privacy-preserving prototype that gives Revenue and Support Ops leaders **clause-level visibility into risky promises** buried in everyday conversations — with every flag explained and cited for human review — plus a product plan for taking it to market as a B2B SaaS tool.
+```bash
+python -m backend.evaluate
+pytest
+```
+
+Both commands require the model to be available in a running Ollama server; they may take several minutes. The current dependency file is pinned, and a fresh environment has not been validated during this documentation change. The local-inference description assumes a local Ollama host; review the configured host before processing sensitive material.
+
+## Applications & Takeaways
+
+The prototype illustrates a review workflow for policy-sensitive commitments: find candidate promises, make uncertainty explicit, provide supporting references, and let an operations manager verify the result. It can also inform coaching themes or a pilot measurement plan.
+
+A useful pilot would measure missed violations, false positives, citation correctness, review time, and inference cost on representative data. The current work does not establish production accuracy, realized savings, compliance certification, or automated enforcement. Longer-document retrieval, richer feedback workflows, and production controls remain possible extensions.
+
+## Project Context
+
+Developed for **MSBA 6461 — Large Language Models**, Carlson School of Management, University of Minnesota. The policy handbook and transcripts are synthetic. Original code, tests, data, and business-plan documents are retained.
 
 ---
 
