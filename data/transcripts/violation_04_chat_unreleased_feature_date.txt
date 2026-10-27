@@ -1,0 +1,22 @@
+[Live Chat Support — Transcript]
+Account: Talon Aerospace Consulting (Enterprise tier)
+Rep: Nina Petrov
+Date: 2026-07-08, 16:03
+
+Customer (Grace Liu): hi, does CloudSuite support SSO with Okta yet? we saw it on your roadmap page but can't tell if it's live
+
+Nina: Hi Grace! Great question. SSO with Okta is not live yet, but I can confirm it is on our public roadmap.
+
+Customer (Grace Liu): ok good to know. any idea on timing? we're trying to plan our security rollout for the quarter
+
+Nina: Let me check with the product team really quick on where that stands... ok, so it's currently in active development. Between you and me, I'd say you can plan on having it in about 3 weeks — the team's close to wrapping it up.
+
+Customer (Grace Liu): oh perfect, that's great timing for us actually, we can build our rollout plan around that
+
+Nina: Yeah I'd go ahead and pencil that in, it should be ready to go by then. I'll also flag your account so you get early access to try it as soon as it ships.
+
+Customer (Grace Liu): awesome, really appreciate the heads up on the timeline
+
+Nina: Of course! Let me know if you need anything else in the meantime.
+
+Customer (Grace Liu): will do, thanks Nina

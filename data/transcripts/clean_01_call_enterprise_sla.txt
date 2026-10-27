@@ -1,0 +1,26 @@
+[Phone Support Call — Transcript]
+Account: Meridian Logistics (Enterprise tier)
+Rep: Daniel Osei
+Date: 2026-03-11
+
+Daniel: Thank you for calling CloudSuite support, this is Daniel. Am I speaking with the account admin for Meridian Logistics?
+
+Customer (Priya Nathan): Yes, that's me. I wanted to check on a couple things before our board review next week. First — what's our guaranteed support response time again? I want to quote it accurately internally.
+
+Daniel: Sure, let me pull up your account. You're on our Enterprise tier, so contractually you're entitled to a 4-hour response time on support tickets. That's been consistent for your account.
+
+Priya: Good, that matches what I remembered. And uptime — what are we actually guaranteed there?
+
+Daniel: For Enterprise tier, the uptime SLA is 99.9%. If we ever fall below that in a billing period, you'd be eligible for service credits per the SLA terms in your contract.
+
+Priya: Perfect. One more thing — we filed a bug report last week about the export tool timing out on large projects. Any update?
+
+Daniel: I can confirm it's been escalated to engineering and it's actively being worked. I don't have a fix date to give you — we don't commit to specific timelines on bug fixes since that can shift depending on complexity — but I can tell you it's flagged as a priority ticket given your tier.
+
+Priya: That's fine, I just wanted confirmation it's being looked at.
+
+Daniel: Absolutely. Anything else I can help with today?
+
+Priya: No, that covers it. Thanks Daniel.
+
+Daniel: You're welcome. Have a good rest of your day.
